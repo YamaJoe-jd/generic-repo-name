@@ -68,6 +68,9 @@ flowchart TD
     style D fill:#fdcb6e,stroke:#b88700,stroke-width:1px,color:#000
     style E fill:#d63031,stroke:#8b1e1e,stroke-width:1px,color:#fff
 ```
+
+
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -98,3 +101,38 @@ sequenceDiagram
 
     FE->>DB: Mark intents as completed
 ```
+
+
+
+
+```mermaid
+flowchart LR
+
+    subgraph Local_Dev [Local Development Environment]
+        direction TB
+        DEV_PC[Developer Machine\nNode 24 + pnpm + TypeScript]
+        VITE[Frontend - React + Vite]
+        API_LOCAL[API Server - Express 5]
+        DB_LOCAL[(PostgreSQL - Local/Docker)]
+        SMB_LOCAL[[SMB Network Share]]
+
+        DEV_PC --> VITE
+        DEV_PC --> API_LOCAL
+        API_LOCAL --> DB_LOCAL
+        API_LOCAL --> SMB_LOCAL
+    end
+
+    subgraph Production [Production Deployment - Fly.io]
+        direction TB
+        FLY_API[Fly.io App - Node 24 + Express 5]
+        FLY_DB[(Fly.io PostgreSQL)]
+        SMB_PROD[[SMB Network Share]]
+
+        FLY_API --> FLY_DB
+        FLY_API --> SMB_PROD
+    end
+
+    VITE -. API URL .-> FLY_API
+    API_LOCAL -. mirrors .-> FLY_API
+```
+
