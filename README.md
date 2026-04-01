@@ -8,7 +8,6 @@
   Concurrency‑safe monitoring and write orchestration for SMB network shares.
 </p>
 
-# Network File Guard
 
 
 Network File Guard is a full‑stack monitoring and management agent designed to protect files on SMB network shares from concurrent write conflicts. When multiple users or processes attempt to update the same file, Network File Guard intelligently queues write operations and flushes them in a single, safe burst once the file becomes free — preventing data corruption, lock collisions, and partial writes.
@@ -68,4 +67,34 @@ flowchart TD
     style C fill:#00b894,stroke:#006f52,stroke-width:1px,color:#fff
     style D fill:#fdcb6e,stroke:#b88700,stroke-width:1px,color:#000
     style E fill:#d63031,stroke:#8b1e1e,stroke-width:1px,color:#fff
+```
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant U as User/Process
+    participant API as API Server<br/>Express 5
+    participant DB as Write Intent Queue<br/>PostgreSQL + Drizzle
+    participant FE as Safe Flush Engine
+    participant SMB as SMB Network Share
+
+    U->>API: Write Request (file + payload)
+    API->>API: Validate payload (Zod)
+    API->>DB: Insert Write Intent
+    API-->>U: Acknowledged (queued)
+
+    Note over DB: Queue grows while file is locked
+
+    FE->>SMB: Check file lock state
+    SMB-->>FE: File is locked
+
+    FE->>SMB: Poll until file becomes free
+    SMB-->>FE: File is free
+
+    FE->>DB: Fetch queued write intents
+    FE->>FE: Merge & prepare atomic write
+    FE->>SMB: Perform safe flush (single write burst)
+    SMB-->>FE: Write successful
+
+    FE->>DB: Mark intents as completed
 ```
