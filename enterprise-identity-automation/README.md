@@ -1,4 +1,7 @@
+# Featured Project
+
 # Enterprise Identity Automation
+Located in `/enterprise-identity-automation`
 
 ## Overview
 This project demonstrates enterprise‑safe Active Directory automation using PowerShell across two execution models:
